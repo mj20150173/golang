@@ -1,0 +1,192 @@
+package main
+
+import (
+	"fmt"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+)
+
+//대문자 public, 소문자 private 비슷
+
+type HasNameAge interface {
+	Name() string
+	Age() int
+}
+
+type CanGreet interface {
+	HasNameAge
+	Greet() string
+}
+
+type Date struct {
+	year, month, day int
+}
+
+func (d *Date) Year() int {
+	return d.year
+}
+func (d *Date) Month() int {
+	return d.month
+}
+func (d *Date) Day() int {
+	return d.day
+}
+func (d *Date) Greet() string {
+	return strconv.Itoa(d.Year()) + "-" + strconv.Itoa(d.Month()) + "-" + strconv.Itoa(d.Day())
+}
+func NewDate(y int, m int, d int) *Date {
+	a := new(Date)
+	a.year = y
+	a.month = m
+	a.day = d
+	return a
+
+}
+
+//date 초기화
+func InitDate() *Date {
+	a := new(Date)
+	a.year = 1
+	a.day = 1
+	a.month = 1
+	return a
+}
+
+type Member struct {
+	name      string
+	birthdate *Date
+	age       int
+	CanGreet
+}
+
+func (m Member) Name() string {
+	return m.name
+}
+
+func (m Member) Age() int {
+	m.age = time.Now().Year() - m.birthdate.Year()
+	return m.age
+
+}
+func (m Member) Greet() string {
+	return "Name: " + m.Name() + ", Age: " + strconv.Itoa(m.Age())
+}
+
+type Teacher struct {
+	mem     Member
+	lecture string
+}
+
+func (t Teacher) Greet() string {
+	return t.mem.Greet() + ", Teaches: " + t.Teaches()
+}
+
+func (t Teacher) Teaches() string {
+	return t.lecture
+
+}
+func (t Teacher) Age() int {
+	return t.mem.Age()
+}
+func (t Teacher) Name() string {
+	return t.mem.name
+}
+
+func NewTeacher(name string, birthdate *Date, teaches string) *Teacher {
+	a := new(Teacher)
+	a.mem.name = name
+	a.mem.birthdate = birthdate
+	a.lecture = teaches
+	return a
+}
+
+type Student struct {
+	mem   Member
+	id_no int
+}
+
+func (s Student) ID_no() int {
+	return s.id_no
+}
+
+func (s Student) Greet() string {
+	return s.mem.Greet() + ", ID_no: " + strconv.Itoa(s.ID_no())
+}
+func NewStudent(name string, birthdate *Date, id_no int) *Student {
+	a := new(Student)
+	a.mem.name = name
+	a.mem.birthdate = birthdate
+	a.id_no = id_no
+	return a
+}
+func (t Student) Age() int {
+	return t.mem.Age()
+}
+func (t Student) Name() string {
+	return t.mem.name
+}
+
+type Visiting struct {
+	valid_thru *Date
+	expired    bool
+	stu        Student
+}
+
+func NewVisiting(name string, birthdate *Date, id_no int, valid_thru *Date) *Visiting {
+	a := new(Visiting)
+	a.stu.mem.name = name
+	a.stu.mem.birthdate = birthdate
+	a.stu.id_no = id_no
+	a.valid_thru = valid_thru
+	return a
+}
+
+func (v Visiting) Expired() bool {
+	return time.Now().Year() >= v.valid_thru.Year()
+}
+func (t Visiting) Age() int {
+	return t.stu.mem.Age()
+}
+func (t Visiting) Name() string {
+	return t.stu.mem.name
+}
+
+func (v Visiting) Greet() string {
+	return v.stu.Greet() + ", Valid_thru: " + v.valid_thru.Greet()
+}
+
+func main() {
+
+	arr := []interface{}{NewTeacher("MH", NewDate(1971, 12, 7), "Program"),
+		NewTeacher("JY", NewDate(1975, 9, 21), "fordidden"),
+		NewStudent("YK", NewDate(1999, 3, 16), 2051),
+		NewStudent("SH", NewDate(2000, 10, 5), 4968),
+	}
+	var Vaneesa CanGreet = NewVisiting("Vanessa", NewDate(1998, 3, 27), 9598,
+		NewDate(2019, 2, 28))
+	var Alice CanGreet = NewVisiting("Alice", NewDate(1995, 7, 14), 9595,
+		NewDate(2019, 12, 25))
+	arr = append(arr, Alice)
+	arr = append(arr, Vaneesa)
+	// ByName
+	sort.Slice(arr, func(i, j int) bool {
+		return strings.ToLower(arr[i].(CanGreet).Name()) < strings.ToLower(arr[j].(CanGreet).Name())
+	})
+	for e := 0; e != len(arr); e++ {
+		fmt.Println(arr[e].(CanGreet).Greet())
+	}
+
+	fmt.Println()
+	fmt.Println()
+
+	//ByAge
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].(CanGreet).Age() < arr[j].(CanGreet).Age()
+	})
+	for e := 0; e != len(arr); e++ {
+		fmt.Println(arr[e].(CanGreet).Greet())
+	}
+
+}
