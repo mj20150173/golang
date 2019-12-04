@@ -1,0 +1,29 @@
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+)
+
+func errCheck(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func main() {
+
+	//파일 읽기,쓰기 ioutil 사용
+	s := "Hello guys im golang\n"
+
+	//파일모드 읽기4 쓰게 2 실행 1
+	//소유자 그룹 기타 사용자 순서
+	err := ioutil.WriteFile("c:/temps/hi.txt", []byte(s), os.FileMode(644))
+	errCheck(err)
+
+	data, err := ioutil.ReadFile("c:/Workspace/stc/paracitce/test.txt")
+	fmt.Println("=============\n")
+	fmt.Println(string(data))
+	fmt.Println("=============\n")
+}
