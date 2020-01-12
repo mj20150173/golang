@@ -1,0 +1,178 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <utility>
+
+//refrence는 한번 초기화시 가리키는 변수를 바꿀 수 없고 값만 변경 가능.
+//reference는 선언시 바로 초기화 해줘야함.
+//상수에 대한 참조는 const선언시 가능함. 애초에 수정 불가능한데 const로 시작부터 선언 불가를 알려주면 아무 문제가 없기때문.
+using namespace std;
+
+
+namespace {
+	void f();
+
+	void f()
+	{
+		cout << "hello" << endl;
+	}
+}
+//익명 namespace로 static과 동일한 기능.
+
+//extern은 외부 링크 선언. 다른 소스파일에서 접근이 가능함
+
+
+
+constexpr int getSize() { return 32; }
+//상수 표현식! 컴파일시 계산됨.
+/*
+함수 본문에 goto문 try/catch 블록, 초기화하지 않은 변수, 리터럴 타입이 아닌 변수가 없어야함. 익셉션도 던지면 안됨, 다른 constexpr함수는 호출 가능
+리턴 타입이 반드시 리터럴 타입
+클래스 멤버가 constexpr일때 virtual선언 불가
+constexpr의 매개변수는 반드시 리터럴타입
+new와 delete사용 불가
+*/
+
+class Rect
+{
+public:
+	constexpr Rect(size_t width, size_t height)
+		:mWidth(width), mHeight(height) {}
+
+	constexpr size_t getArea() const { return mWidth * mHeight; }
+private:
+	size_t mWidth, mHeight;
+};
+
+using intPtr = int*;
+using MatchFunction = bool(*)(int, int);
+
+
+void FindMatches(int values1[], int values2[], size_t numValues, MatchFunction matcher)
+{
+	for (size_t i = 0; i < numValues; i++)
+	{
+		if (matcher(values1[i], values2[i]))
+		{
+			cout << "Found!: " << values1[i] << " same " << values2[i] << endl;
+		}
+	}
+}
+
+bool intEqual(int item1, int item2)
+{
+	return item1 == item2;
+}
+
+/*
+Employee emp;
+using PtrToGet = int (Employee::*) () const;
+PtrToGet methodPtr = &Employee::getSalary;
+cout<<(employee.*methodPtr)()<<endl;
+
+
+using auto is more simple!
+
+Employee emp;
+auto methodPtr=&Employee::getSalary
+cout<<(employee.*methodPtr)()<<endl;
+
+
+
+
+
+
+*/
+
+
+using charPtr = char*;
+
+class X {};
+class Y {};
+
+
+
+class Demo
+{
+public:
+	static int getScore() { return 32; }
+};
+
+int getScore()
+{
+	return 42;
+}
+
+namespace SE
+{
+	int getScore()
+	{
+		return 52;
+	}
+}
+
+
+
+int main()
+{
+	//포인터로 가리키는 값이 수정되지 않게 하려면
+
+	//const int* ptr;
+	//ptr = new int[10];
+	//ptr[5] = 4; 포인터로 가리키는 값을 수정하지 못함! 에러발생
+
+
+	//변경하지 못하게 하려는 값이 포인터 자체라면
+	//int* const ptr = nullptr 또는 new int[size] 이 말의 뜻은 포인터 원소의 값은 수정 가능하지만 한번 포인터를 선언하고나면 사이즈를 변경 불가능하단 뜻.
+	//만약 nullptr로 지정했으면 평생 nulltpr이란 의미임.
+
+	int z = 5;
+	const int& ref = z;
+	cout <<ref << endl;
+	z = 8;
+	cout << ref << endl;
+	int myarr[getSize()+9];
+
+	constexpr Rect r(8, 2);
+	int myArr[r.getArea()];
+	//static 선언시 내부링크가 되어 그 소스파일에서만 접근이 가능. 다른 외부 파일에서 접근 불가.
+
+	int arr1[] = { 2,5,6,9,10,1,1 };
+	int arr2[]={4, 4, 2, 9, 0, 1, 1};
+
+	size_t arrsize = size(arr1);
+	FindMatches(arr1, arr2,arrsize, &intEqual);
+
+
+
+	string str = "se";
+	const string& constr = as_const(str);
+	//as_const는 non_const를 const로 변환
+
+	int i = 3;
+	int j = 4;
+	double res = static_cast<double>(i) / j;
+	
+	
+	X x;
+	Y y;
+	X* xp = &x;
+	Y* yp = &y;
+
+	xp = reinterpret_cast<X*>(yp);
+	void* p = xp;
+	xp = reinterpret_cast<X*>(p);
+
+
+
+
+	auto pd = make_unique<Demo>();
+	Demo d;
+	cout << pd->getScore() << endl;//32
+	cout << d.getScore() << endl;//32
+	cout << SE::getScore() << endl; //52
+	cout << Demo::getScore() << endl; //32
+	cout << ::getScore() << endl; //42
+	cout << getScore() << endl; //42
+
+}
