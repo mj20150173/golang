@@ -1,0 +1,155 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <utility>
+
+//refrence는 한번 초기화시 가리키는 변수를 바꿀 수 없고 값만 변경 가능.
+//reference는 선언시 바로 초기화 해줘야함.
+//상수에 대한 참조는 const선언시 가능함. 애초에 수정 불가능한데 const로 시작부터 선언 불가를 알려주면 아무 문제가 없기때문.
+using namespace std;
+
+
+class MyClass
+{
+public:
+	MyClass(int& ref): mref(ref) {}
+private:
+	int& mref;
+};
+
+
+
+void swap(int& first, int& second)
+{
+	int temp = first;
+	first = second;
+	second = temp;
+}
+//레퍼런스 수정시 원본에도 영향을!
+//크기가 큰 객체를 전달할때 pass by value는 복사 비용이 크다.
+//복사 전달을 지원하지 않는 객체가 존재함
+// 객체는 레퍼런스가 굳
+//lvalue 변수처럼 이름과 주소를 가짐 대입문 왼쪽에 등장
+//rvalue 상숫값과 임시객체 등등
+
+
+void handleMessage(string& mess)
+{
+	cout << "handle Message is " << mess << endl;
+}
+void handleMessage(string&& mess)
+{
+	cout << "handle Messsage is " << mess << endl;
+}
+
+
+
+void Pswap(int* first, int* second)
+{
+	int temp = *first;
+	*first = *second;
+	*second = temp;
+}
+
+//레퍼런스는 한번 초기화되면 가리키는 주소값을 바꿀 수 없음. 따라서 주소를 바꿀 일이 있는경우 포인터가 더 좋음.
+//다형성 지원할때 optional 타입(nullptr이 될 수 있기 때문)은 포인터 사용
+//메모리 해제할 일이 있으면 포인터 없으면 레퍼런스 사용!
+
+
+void separateOddsAndEvens(const int arr[], size_t size, int*& odds, size_t& numOdds, int*& evens, size_t& numEvens)
+{
+	numOdds = numEvens = 0;
+	for (size_t i = 0; i < size; i++)
+	{
+		if (arr[i] % 2 == 1)
+		{
+			++numOdds;
+		}
+		else
+		{
+			++numEvens;
+		}
+	}
+	odds = new int[numOdds];
+	evens = new int[numEvens];
+
+	size_t oddsIndex = 0, evenIndex = 0;
+
+
+	for (size_t i = 0; i < size; i++)
+	{
+		if (arr[i] % 2 == 1)
+		{
+			odds[oddsIndex++] = arr[i];
+		}
+		else
+		{
+			evens[evenIndex++] = arr[i];
+		}
+	}
+
+
+
+
+}
+
+
+
+void separateOddsAndEvens(const vector<int>& arr, vector<int>& odds, vector<int>& evens)
+{
+	for (int i : arr) {
+		if (i % 2 == 1)
+		{
+			odds.push_back(i);
+		}
+		else
+		{
+			evens.push_back(i);
+		}
+	}
+}
+
+pair<vector<int>, vector<int>> PairOddsEvens(const vector<int>& arr)
+{
+	vector<int> odds, evens;
+	for (int i : arr)
+	{
+		if (i % 2 == 1)
+		{
+			odds.push_back(i);
+		}
+		else
+		{
+			evens.push_back(i);
+		}
+	}
+	return make_pair(odds, evens);
+}
+
+
+int main()
+{
+	//handleMessage("hello world") 매개변수가 lvalue로 선언됨. but 리터럴은 lvalue가아님.
+	string a = "hello";
+	string b = "world";
+	handleMessage(a + b);
+	//따라서 위와 같이 호출하려면 rvalue받게 변경해야함 &&로 선언
+	int unSplit[] = { 1,2,3,4,5,6,7,8,9,10 };
+	int* oddNums = nullptr;
+	int* evenNums = nullptr;
+
+	size_t numOdds = 0, numEvens = 0;
+
+	separateOddsAndEvens(unSplit, size(unSplit), oddNums, numOdds, evenNums, numEvens);
+
+	delete[] oddNums; oddNums = nullptr;
+	delete[] evenNums; evenNums = nullptr;
+
+	vector<int> vecUnsplit = { 1,2,3,4,5,6,7,8,9,10 };
+	vector<int> odds, evens;
+	separateOddsAndEvens(vecUnsplit, odds, evens);
+	
+
+	auto[odd, even] = PairOddsEvens(vecUnsplit);
+
+}
